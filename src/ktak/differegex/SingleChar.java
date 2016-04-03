@@ -1,5 +1,7 @@
 package ktak.differegex;
 
+import java.util.Comparator;
+
 class SingleChar<CharType> extends Regex<CharType> {
     
     public final CharType matchChar;
@@ -14,6 +16,11 @@ class SingleChar<CharType> extends Regex<CharType> {
     @Override
     protected boolean matchesEmptyString() {
         return false;
+    }
+    
+    @Override
+    protected Partition<CharType> partition(Comparator<CharType> cmp) {
+        return Partition.singleChar(cmp, matchChar);
     }
     
 }

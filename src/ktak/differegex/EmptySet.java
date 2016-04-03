@@ -1,5 +1,7 @@
 package ktak.differegex;
 
+import java.util.Comparator;
+
 class EmptySet<CharType> extends Regex<CharType> {
     
     @Override
@@ -10,6 +12,11 @@ class EmptySet<CharType> extends Regex<CharType> {
     @Override
     protected boolean matchesEmptyString() {
         return false;
+    }
+    
+    @Override
+    protected Partition<CharType> partition(Comparator<CharType> cmp) {
+        return Partition.trivial(cmp);
     }
     
 }

@@ -1,5 +1,7 @@
 package ktak.differegex;
 
+import java.util.Comparator;
+
 public abstract class Regex<CharType> {
     
     protected abstract <R> R visit(Visitor<R,CharType> visitor);
@@ -16,5 +18,7 @@ public abstract class Regex<CharType> {
     }
     
     protected abstract boolean matchesEmptyString();
+    
+    protected abstract Partition<CharType> partition(Comparator<CharType> cmp);
     
 }

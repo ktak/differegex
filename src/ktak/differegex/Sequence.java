@@ -1,5 +1,7 @@
 package ktak.differegex;
 
+import java.util.Comparator;
+
 class Sequence<CharType> extends Regex<CharType> {
     
     public final Regex<CharType> first;
@@ -20,6 +22,13 @@ class Sequence<CharType> extends Regex<CharType> {
     @Override
     protected boolean matchesEmptyString() {
         return matchesEmptyString;
+    }
+    
+    @Override
+    protected Partition<CharType> partition(Comparator<CharType> cmp) {
+        return first.matchesEmptyString() ?
+                first.partition(cmp).intersect(second.partition(cmp)) :
+                first.partition(cmp);
     }
     
 }
