@@ -11,4 +11,9 @@ class ZeroOrMore<CharType> extends Regex<CharType> {
         return visitor.visitZeroOrMore(this);
     }
     
+    @Override
+    protected boolean matchesEmptyString() {
+        return true;
+    }
+    
 }

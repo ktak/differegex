@@ -11,4 +11,9 @@ class SingleChar<CharType> extends Regex<CharType> {
         return visitor.visitSingleChar(this);
     }
     
+    @Override
+    protected boolean matchesEmptyString() {
+        return false;
+    }
+    
 }

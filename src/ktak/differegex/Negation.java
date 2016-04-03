@@ -11,4 +11,9 @@ class Negation<CharType> extends Regex<CharType> {
         return visitor.visitNegation(this);
     }
     
+    @Override
+    protected boolean matchesEmptyString() {
+        return !regex.matchesEmptyString();
+    }
+    
 }

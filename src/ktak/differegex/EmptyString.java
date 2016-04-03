@@ -7,4 +7,9 @@ class EmptyString<CharType> extends Regex<CharType> {
         return visitor.visitEmptyString(this);
     }
     
+    @Override
+    protected boolean matchesEmptyString() {
+        return true;
+    }
+    
 }

@@ -15,4 +15,6 @@ public abstract class Regex<CharType> {
         R visitNegation(Negation<CharType> negation);
     }
     
+    protected abstract boolean matchesEmptyString();
+    
 }
