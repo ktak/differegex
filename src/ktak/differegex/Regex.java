@@ -33,4 +33,32 @@ public abstract class Regex<CharType> {
     
     protected abstract Partition<CharType> partition(Comparator<CharType> cmp);
     
+    public static <CharType> Regex<CharType> emptyString() {
+        return new EmptyString<CharType>();
+    }
+    
+    public static <CharType> Regex<CharType> singleChar(CharType matchChar) {
+        return new SingleChar<CharType>(matchChar);
+    }
+    
+    public Regex<CharType> seq(Regex<CharType> second) {
+        return new Sequence<CharType>(this, second);
+    }
+    
+    public Regex<CharType> alt(Regex<CharType> second) {
+        return new Alternation<CharType>(this, second);
+    }
+    
+    public Regex<CharType> zeroOrMore() {
+        return new ZeroOrMore<CharType>(this);
+    }
+    
+    public Regex<CharType> conj(Regex<CharType> second) {
+        return new Conjunction<CharType>(this, second);
+    }
+    
+    public Regex<CharType> negate() {
+        return new Negation<CharType>(this);
+    }
+    
 }
