@@ -7,14 +7,8 @@ import org.junit.Test;
 
 public class RegexComparatorTest {
     
-    private static final Comparator<Character> charCmp = new Comparator<Character>() {
-        
-        @Override
-        public int compare(Character o1, Character o2) {
-            return o1.compareTo(o2);
-        }
-        
-    };
+    private static final Comparator<Character> charCmp =
+            (c1, c2) -> c1.compareTo(c2);
     
     private static final RegexComparator<Character> regexCmp =
             new RegexComparator<Character>(charCmp);
