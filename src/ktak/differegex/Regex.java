@@ -33,6 +33,8 @@ public abstract class Regex<CharType> {
     
     protected abstract Partition<CharType> partition(Comparator<CharType> cmp);
     
+    protected abstract Regex<CharType> differentiate(CharType matchChar, Comparator<CharType> cmp);
+    
     public static <CharType> Regex<CharType> emptyString() {
         return new EmptyString<CharType>();
     }

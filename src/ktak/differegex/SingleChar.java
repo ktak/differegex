@@ -26,7 +26,8 @@ class SingleChar<CharType> extends Regex<CharType> {
     }
     
     @Override
-    protected <R> R match(Function<EmptySet<CharType>, R> emptySetCase,
+    protected <R> R match(
+            Function<EmptySet<CharType>, R> emptySetCase,
             Function<EmptyString<CharType>, R> emptyStringCase,
             Function<SingleChar<CharType>, R> singleCharCase,
             Function<Sequence<CharType>, R> sequenceCase,
@@ -35,6 +36,12 @@ class SingleChar<CharType> extends Regex<CharType> {
             Function<Conjunction<CharType>, R> conjunctionCase,
             Function<Negation<CharType>, R> negationCase) {
         return singleCharCase.apply(this);
+    }
+    
+    @Override
+    protected Regex<CharType> differentiate(CharType matchChar, Comparator<CharType> cmp) {
+        return cmp.compare(this.matchChar, matchChar) == 0 ?
+                Regex.emptyString() : new EmptySet<CharType>();
     }
     
 }

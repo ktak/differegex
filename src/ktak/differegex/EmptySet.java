@@ -22,7 +22,8 @@ class EmptySet<CharType> extends Regex<CharType> {
     }
     
     @Override
-    protected <R> R match(Function<EmptySet<CharType>, R> emptySetCase,
+    protected <R> R match(
+            Function<EmptySet<CharType>, R> emptySetCase,
             Function<EmptyString<CharType>, R> emptyStringCase,
             Function<SingleChar<CharType>, R> singleCharCase,
             Function<Sequence<CharType>, R> sequenceCase,
@@ -31,6 +32,11 @@ class EmptySet<CharType> extends Regex<CharType> {
             Function<Conjunction<CharType>, R> conjunctionCase,
             Function<Negation<CharType>, R> negationCase) {
         return emptySetCase.apply(this);
+    }
+    
+    @Override
+    protected Regex<CharType> differentiate(CharType matchChar, Comparator<CharType> cmp) {
+        return this;
     }
     
 }
