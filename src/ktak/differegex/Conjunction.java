@@ -18,11 +18,6 @@ class Conjunction<CharType> extends Regex<CharType> {
     }
     
     @Override
-    protected <R> R visit(Visitor<R, CharType> visitor) {
-        return visitor.visitConjunction(this);
-    }
-    
-    @Override
     protected boolean matchesEmptyString() {
         return matchesEmptyString;
     }

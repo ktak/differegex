@@ -18,11 +18,6 @@ class Alternation<CharType> extends Regex<CharType> {
     }
     
     @Override
-    protected <R> R visit(Visitor<R, CharType> visitor) {
-        return visitor.visitAlternation(this);
-    }
-    
-    @Override
     protected boolean matchesEmptyString() {
         return matchesEmptyString;
     }

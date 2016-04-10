@@ -8,11 +8,6 @@ import ktak.immutablejava.Unit;
 class EmptyString<CharType> extends Regex<CharType> {
     
     @Override
-    protected <R> R visit(Visitor<R, CharType> visitor) {
-        return visitor.visitEmptyString(this);
-    }
-    
-    @Override
     protected boolean matchesEmptyString() {
         return true;
     }

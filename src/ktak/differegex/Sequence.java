@@ -18,11 +18,6 @@ class Sequence<CharType> extends Regex<CharType> {
     }
     
     @Override
-    protected <R> R visit(Visitor<R, CharType> visitor) {
-        return visitor.visitSequence(this);
-    }
-    
-    @Override
     protected boolean matchesEmptyString() {
         return matchesEmptyString;
     }
