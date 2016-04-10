@@ -3,6 +3,7 @@ package ktak.differegex;
 import java.util.Comparator;
 
 import ktak.immutablejava.Function;
+import ktak.immutablejava.Unit;
 
 public abstract class Regex<CharType> {
     
@@ -17,6 +18,54 @@ public abstract class Regex<CharType> {
             Function<ZeroOrMore<CharType>,R> zeroOrMoreCase,
             Function<Conjunction<CharType>,R> conjunctionCase,
             Function<Negation<CharType>,R> negationCase);
+    
+    protected <R> R matchEmptySet(
+            Function<EmptySet<CharType>,R> emptySetCase,
+            Function<Unit,R> otherwise) {
+        return otherwise.apply(Unit.unit);
+    }
+    
+    protected <R> R matchEmptyString(
+            Function<EmptyString<CharType>,R> emptyStringCase,
+            Function<Unit,R> otherwise) {
+        return otherwise.apply(Unit.unit);
+    }
+    
+    protected <R> R matchSingleChar(
+            Function<SingleChar<CharType>,R> singleCharCase,
+            Function<Unit,R> otherwise) {
+        return otherwise.apply(Unit.unit);
+    }
+    
+    protected <R> R matchSequence(
+            Function<Sequence<CharType>,R> sequenceCase,
+            Function<Unit,R> otherwise) {
+        return otherwise.apply(Unit.unit);
+    }
+    
+    protected <R> R matchAlternation(
+            Function<Alternation<CharType>,R> alternationCase,
+            Function<Unit,R> otherwise) {
+        return otherwise.apply(Unit.unit);
+    }
+    
+    protected <R> R matchZeroOrMore(
+            Function<ZeroOrMore<CharType>,R> zeroOrMoreCase,
+            Function<Unit,R> otherwise) {
+        return otherwise.apply(Unit.unit);
+    }
+    
+    protected <R> R matchConjunction(
+            Function<Conjunction<CharType>,R> conjunctionCase,
+            Function<Unit,R> otherwise) {
+        return otherwise.apply(Unit.unit);
+    }
+    
+    protected <R> R matchNegation(
+            Function<Negation<CharType>,R> negationCase,
+            Function<Unit,R> otherwise) {
+        return otherwise.apply(Unit.unit);
+    }
     
     protected interface Visitor<R,CharType> {
         R visitEmptySet(EmptySet<CharType> emptySet);

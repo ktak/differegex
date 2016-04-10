@@ -3,6 +3,7 @@ package ktak.differegex;
 import java.util.Comparator;
 
 import ktak.immutablejava.Function;
+import ktak.immutablejava.Unit;
 
 class ZeroOrMore<CharType> extends Regex<CharType> {
     
@@ -35,6 +36,13 @@ class ZeroOrMore<CharType> extends Regex<CharType> {
             Function<ZeroOrMore<CharType>, R> zeroOrMoreCase,
             Function<Conjunction<CharType>, R> conjunctionCase,
             Function<Negation<CharType>, R> negationCase) {
+        return zeroOrMoreCase.apply(this);
+    }
+    
+    @Override
+    protected <R> R matchZeroOrMore(
+            Function<ZeroOrMore<CharType>,R> zeroOrMoreCase,
+            Function<Unit,R> otherwise) {
         return zeroOrMoreCase.apply(this);
     }
     

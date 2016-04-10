@@ -3,6 +3,7 @@ package ktak.differegex;
 import java.util.Comparator;
 
 import ktak.immutablejava.Function;
+import ktak.immutablejava.Unit;
 
 class EmptyString<CharType> extends Regex<CharType> {
     
@@ -31,6 +32,13 @@ class EmptyString<CharType> extends Regex<CharType> {
             Function<ZeroOrMore<CharType>, R> zeroOrMoreCase,
             Function<Conjunction<CharType>, R> conjunctionCase,
             Function<Negation<CharType>, R> negationCase) {
+        return emptyStringCase.apply(this);
+    }
+    
+    @Override
+    protected <R> R matchEmptyString(
+            Function<EmptyString<CharType>,R> emptyStringCase,
+            Function<Unit,R> otherwise) {
         return emptyStringCase.apply(this);
     }
     

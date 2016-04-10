@@ -3,6 +3,7 @@ package ktak.differegex;
 import java.util.Comparator;
 
 import ktak.immutablejava.Function;
+import ktak.immutablejava.Unit;
 
 class Sequence<CharType> extends Regex<CharType> {
     
@@ -43,6 +44,13 @@ class Sequence<CharType> extends Regex<CharType> {
             Function<ZeroOrMore<CharType>, R> zeroOrMoreCase,
             Function<Conjunction<CharType>, R> conjunctionCase,
             Function<Negation<CharType>, R> negationCase) {
+        return sequenceCase.apply(this);
+    }
+    
+    @Override
+    protected <R> R matchSequence(
+            Function<Sequence<CharType>,R> sequenceCase,
+            Function<Unit,R> otherwise) {
         return sequenceCase.apply(this);
     }
     

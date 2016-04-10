@@ -3,6 +3,7 @@ package ktak.differegex;
 import java.util.Comparator;
 
 import ktak.immutablejava.Function;
+import ktak.immutablejava.Unit;
 
 class Alternation<CharType> extends Regex<CharType> {
     
@@ -41,6 +42,13 @@ class Alternation<CharType> extends Regex<CharType> {
             Function<ZeroOrMore<CharType>, R> zeroOrMoreCase,
             Function<Conjunction<CharType>, R> conjunctionCase,
             Function<Negation<CharType>, R> negationCase) {
+        return alternationCase.apply(this);
+    }
+    
+    @Override
+    protected <R> R matchAlternation(
+            Function<Alternation<CharType>,R> alternationCase,
+            Function<Unit,R> otherwise) {
         return alternationCase.apply(this);
     }
     

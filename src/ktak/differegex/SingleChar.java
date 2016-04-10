@@ -3,6 +3,7 @@ package ktak.differegex;
 import java.util.Comparator;
 
 import ktak.immutablejava.Function;
+import ktak.immutablejava.Unit;
 
 class SingleChar<CharType> extends Regex<CharType> {
     
@@ -35,6 +36,13 @@ class SingleChar<CharType> extends Regex<CharType> {
             Function<ZeroOrMore<CharType>, R> zeroOrMoreCase,
             Function<Conjunction<CharType>, R> conjunctionCase,
             Function<Negation<CharType>, R> negationCase) {
+        return singleCharCase.apply(this);
+    }
+    
+    @Override
+    protected <R> R matchSingleChar(
+            Function<SingleChar<CharType>,R> singleCharCase,
+            Function<Unit,R> otherwise) {
         return singleCharCase.apply(this);
     }
     
