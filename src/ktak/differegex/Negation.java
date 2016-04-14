@@ -46,4 +46,16 @@ class Negation<CharType> extends Regex<CharType> {
         return regex.differentiate(matchChar, cmp).negate();
     }
     
+    @Override
+    protected Regex<CharType> normalize(RegexComparator<CharType> cmp) {
+        
+        Regex<CharType> normalized = regex.normalize(cmp);
+        
+        return normalized.matchNegation(
+                // NOT(NOT(r)) = r
+                (negation) -> negation.regex,
+                (unit) -> normalized.negate());
+        
+    }
+    
 }

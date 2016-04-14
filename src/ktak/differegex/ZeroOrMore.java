@@ -46,4 +46,24 @@ class ZeroOrMore<CharType> extends Regex<CharType> {
         return regex.differentiate(matchChar, cmp).seq(this);
     }
     
+    @Override
+    protected Regex<CharType> normalize(RegexComparator<CharType> cmp) {
+        
+        Regex<CharType> normalized = regex.normalize(cmp);
+        
+        return normalized.match(
+                // NULL* = ''
+                (emptySet) -> new EmptyString<CharType>(),
+                // ''* = ''
+                (emptyString) -> emptyString,
+                (singleChar) -> normalized.zeroOrMore(),
+                (sequence) -> normalized.zeroOrMore(),
+                (alternation) -> normalized.zeroOrMore(),
+                // r** = r*
+                (zeroOrMore) -> zeroOrMore,
+                (conjunction) -> normalized.zeroOrMore(),
+                (negation) -> normalized.zeroOrMore());
+        
+    }
+    
 }

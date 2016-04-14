@@ -47,4 +47,9 @@ class SingleChar<CharType> extends Regex<CharType> {
                 Regex.emptyString() : new EmptySet<CharType>();
     }
     
+    @Override
+    protected Regex<CharType> normalize(RegexComparator<CharType> cmp) {
+        return this;
+    }
+    
 }

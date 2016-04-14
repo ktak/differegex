@@ -71,6 +71,8 @@ public abstract class Regex<CharType> {
     
     protected abstract Regex<CharType> differentiate(CharType matchChar, Comparator<CharType> cmp);
     
+    protected abstract Regex<CharType> normalize(RegexComparator<CharType> cmp);
+    
     public static <CharType> Regex<CharType> emptyString() {
         return new EmptyString<CharType>();
     }

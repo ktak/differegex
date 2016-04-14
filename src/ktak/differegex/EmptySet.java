@@ -42,4 +42,9 @@ class EmptySet<CharType> extends Regex<CharType> {
         return this;
     }
     
+    @Override
+    protected Regex<CharType> normalize(RegexComparator<CharType> cmp) {
+        return this;
+    }
+    
 }

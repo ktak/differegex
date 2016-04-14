@@ -56,4 +56,40 @@ class Sequence<CharType> extends Regex<CharType> {
                         second.differentiate(matchChar, cmp) : new EmptySet<CharType>());
     }
     
+    private Regex<CharType> checkSecond(Regex<CharType> first, Regex<CharType> second) {
+        
+        return second.matchEmptySet(
+                // r . NULL = NULL
+                (emptySet) -> emptySet,
+                (unit1) -> second.matchEmptyString(
+                        // r . '' = r
+                        (emptyString) -> first,
+                        (unit2) -> first.seq(second)));
+        
+    }
+    
+    @Override
+    protected Regex<CharType> normalize(RegexComparator<CharType> cmp) {
+        
+        Regex<CharType> firstNormalized = first.normalize(cmp);
+        Regex<CharType> secondNormalized = second.normalize(cmp);
+        
+        return firstNormalized.match(
+                // NULL . r = NULL
+                (emptySet) -> emptySet,
+                // '' . r = r
+                (emptyString) -> secondNormalized,
+                (singleChar) -> checkSecond(firstNormalized, secondNormalized),
+                // make sequence chains right associative
+                (sequence) ->
+                        sequence.first.seq(
+                                sequence.second.seq(secondNormalized).normalize(cmp))
+                        .normalize(cmp),
+                (alternation) -> checkSecond(firstNormalized, secondNormalized),
+                (zeroOrMore) -> checkSecond(firstNormalized, secondNormalized),
+                (conjunction) -> checkSecond(firstNormalized, secondNormalized),
+                (negation) -> checkSecond(firstNormalized, secondNormalized));
+        
+    }
+    
 }
