@@ -101,4 +101,8 @@ public abstract class Regex<CharType> {
         return new Negation<CharType>(this);
     }
     
+    public Regex<CharType> zeroOrOne() {
+        return this.alt(emptyString());
+    }
+    
 }
