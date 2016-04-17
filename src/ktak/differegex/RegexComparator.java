@@ -4,7 +4,7 @@ import java.util.Comparator;
 
 class RegexComparator<CharType> implements Comparator<Regex<CharType>> {
     
-    private final Comparator<CharType> charCmp;
+    protected final Comparator<CharType> charCmp;
     
     public RegexComparator(Comparator<CharType> charCmp) { this.charCmp = charCmp; }
     
