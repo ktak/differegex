@@ -47,6 +47,11 @@ class ZeroOrMore<CharType> extends Regex<CharType> {
     }
     
     @Override
+    protected Regex<CharType> nullDerivative() {
+        return regex.nullDerivative().seq(this);
+    }
+    
+    @Override
     protected Regex<CharType> normalize(RegexComparator<CharType> cmp) {
         
         Regex<CharType> normalized = regex.normalize(cmp);

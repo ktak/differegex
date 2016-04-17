@@ -48,6 +48,11 @@ class SingleChar<CharType> extends Regex<CharType> {
     }
     
     @Override
+    protected Regex<CharType> nullDerivative() {
+        return new EmptySet<CharType>();
+    }
+    
+    @Override
     protected Regex<CharType> normalize(RegexComparator<CharType> cmp) {
         return this;
     }

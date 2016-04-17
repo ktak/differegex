@@ -56,6 +56,13 @@ class Sequence<CharType> extends Regex<CharType> {
                         second.differentiate(matchChar, cmp) : new EmptySet<CharType>());
     }
     
+    @Override
+    protected Regex<CharType> nullDerivative() {
+        return first.nullDerivative().seq(second).alt(
+                first.matchesEmptyString() ?
+                        second.nullDerivative() : new EmptySet<CharType>());
+    }
+    
     private Regex<CharType> checkSecond(Regex<CharType> first, Regex<CharType> second) {
         
         return second.matchEmptySet(

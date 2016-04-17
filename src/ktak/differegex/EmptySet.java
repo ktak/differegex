@@ -43,6 +43,11 @@ class EmptySet<CharType> extends Regex<CharType> {
     }
     
     @Override
+    protected Regex<CharType> nullDerivative() {
+        return this;
+    }
+    
+    @Override
     protected Regex<CharType> normalize(RegexComparator<CharType> cmp) {
         return this;
     }

@@ -53,6 +53,11 @@ class Conjunction<CharType> extends Regex<CharType> {
                 second.differentiate(matchChar, cmp));
     }
     
+    @Override
+    protected Regex<CharType> nullDerivative() {
+        return first.nullDerivative().alt(second.nullDerivative());
+    }
+    
     private Regex<CharType> orderedConj(
             Regex<CharType> first, Regex<CharType> second, RegexComparator<CharType> cmp) {
         // order (non conjunction) subcomponents to normalize symmetry

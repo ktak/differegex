@@ -53,6 +53,11 @@ class Alternation<CharType> extends Regex<CharType> {
                 second.differentiate(matchChar, cmp));
     }
     
+    @Override
+    protected Regex<CharType> nullDerivative() {
+        return first.nullDerivative().alt(second.nullDerivative());
+    }
+    
     private Regex<CharType> orderedAlt(
             Regex<CharType> first, Regex<CharType> second, RegexComparator<CharType> cmp) {
         // order (non alternation) subcomponents to normalize symmetry

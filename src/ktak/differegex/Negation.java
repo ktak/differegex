@@ -47,6 +47,11 @@ class Negation<CharType> extends Regex<CharType> {
     }
     
     @Override
+    protected Regex<CharType> nullDerivative() {
+        return regex.nullDerivative().negate();
+    }
+    
+    @Override
     protected Regex<CharType> normalize(RegexComparator<CharType> cmp) {
         
         Regex<CharType> normalized = regex.normalize(cmp);
