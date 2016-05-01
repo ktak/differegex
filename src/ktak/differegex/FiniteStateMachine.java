@@ -2,28 +2,32 @@ package ktak.differegex;
 
 import java.util.Comparator;
 
+import ktak.immutablejava.AATreeMap;
 import ktak.immutablejava.AATreeSet;
 
-public class FiniteStateMachine<CharType> {
+public class FiniteStateMachine<Ch,Lbl> {
     
-    private final State<CharType> initialState;
-    private final AATreeSet<State<CharType>> acceptingStates;
-    private final Transitions<State<CharType>, CharType> transitions;
-    private final Comparator<State<CharType>> stateCmp =
+    private final State<Ch> initialState;
+    private final AATreeSet<State<Ch>> acceptingStates;
+    private final AATreeMap<Long,AATreeSet<Lbl>> acceptingStateLabels;
+    private final Transitions<State<Ch>,Ch> transitions;
+    private final Comparator<State<Ch>> stateCmp =
             (s1, s2) -> s1.id.compareTo(s2.id);
     
     protected FiniteStateMachine(
             Long initialState,
             AATreeSet<Long> acceptingStates,
-            Transitions<Long, CharType> transitions) {
+            AATreeMap<Long,AATreeSet<Lbl>> acceptingStateLabels,
+            Transitions<Long,Ch> transitions) {
         
         this.initialState = wrapIntialState(initialState);
         this.acceptingStates = wrapAcceptingStates(acceptingStates);
         this.transitions = wrapTransitions(transitions);
+        this.acceptingStateLabels = acceptingStateLabels;
         
     }
     
-    public static class State<CharType> {
+    public static class State<Ch> {
         
         private final Long id;
         
@@ -33,44 +37,51 @@ public class FiniteStateMachine<CharType> {
         
     }
     
-    private State<CharType> wrapIntialState(Long initialState) {
-        return new State<CharType>(initialState);
+    private State<Ch> wrapIntialState(Long initialState) {
+        return new State<Ch>(initialState);
     }
     
-    private AATreeSet<State<CharType>> wrapAcceptingStates(AATreeSet<Long> acceptingStates) {
+    private AATreeSet<State<Ch>> wrapAcceptingStates(AATreeSet<Long> acceptingStates) {
         
         return acceptingStates.sortedList().foldRight(
                 AATreeSet.emptySet(stateCmp),
-                (l) -> (set) -> set.insert(new State<CharType>(l)));
+                (l) -> (set) -> set.insert(new State<Ch>(l)));
         
     }
     
-    private Transitions<State<CharType>, CharType> wrapTransitions(
-            Transitions<Long, CharType> transitions) {
+    private Transitions<State<Ch>, Ch> wrapTransitions(
+            Transitions<Long, Ch> transitions) {
         
-        return new Transitions<State<CharType>, CharType>(
+        return new Transitions<State<Ch>, Ch>(
                 transitions.delta.mapKV(
-                        (from) -> new State<CharType>(from),
-                        (outgoingArrows) -> outgoingArrows.mapValues((to) -> new State<CharType>(to)),
+                        (from) -> new State<Ch>(from),
+                        (outgoingArrows) -> outgoingArrows.mapValues(
+                                (to) -> new State<Ch>(to)),
                         stateCmp),
                 transitions.defaults.mapKV(
-                        (from) -> new State<CharType>(from),
-                        (to) -> new State<CharType>(to),
+                        (from) -> new State<Ch>(from),
+                        (to) -> new State<Ch>(to),
                         stateCmp),
                 transitions.charCmp);
         
     }
     
-    public State<CharType> initialState() {
+    public State<Ch> initialState() {
         return initialState;
     }
     
-    public boolean isAcceptingState(State<CharType> state) {
+    public boolean isAcceptingState(State<Ch> state) {
         return acceptingStates.contains(state);
     }
     
-    public State<CharType> nextState(State<CharType> currentState, CharType nextChar) {
+    public State<Ch> nextState(State<Ch> currentState, Ch nextChar) {
         return transitions.getNextState(currentState, nextChar);
+    }
+    
+    public AATreeSet<Lbl> acceptingStateLabels(State<Ch> state) {
+        return acceptingStateLabels.get(state.id).match(
+                (unit) -> { throw new RuntimeException(); },
+                (lbls) -> lbls);
     }
     
 }

@@ -11,15 +11,19 @@ public class RegexToFiniteStateMachineTest {
     
     private static final Comparator<Character> charCmp =
             (c1, c2) -> c1.compareTo(c2);
+    private static final Comparator<String> strCmp =
+            (s1, s2) -> s1.compareTo(s2);
+    private static final String label = "label";
     
     @Test
     public void emptySetTest() {
         
         Regex<Character> regex = new EmptySet<Character>();
-        FiniteStateMachine<Character> fsm = RegexToFiniteStateMachine.construct(regex, charCmp);
+        FiniteStateMachine<Character,String> fsm =
+                RegexToFiniteStateMachine.construct(regex, label, charCmp, strCmp);
         
-        Assert.assertFalse(FSMRecognizes(fsm, ""));
-        Assert.assertFalse(FSMRecognizes(fsm, "a"));
+        Assert.assertFalse(FSMRecognizesWithLabel(fsm, label, ""));
+        Assert.assertFalse(FSMRecognizesWithLabel(fsm, label, "a"));
         
     }
     
@@ -27,11 +31,12 @@ public class RegexToFiniteStateMachineTest {
     public void emptyStringTest() {
         
         Regex<Character> regex = Regex.emptyString();
-        FiniteStateMachine<Character> fsm = RegexToFiniteStateMachine.construct(regex, charCmp);
+        FiniteStateMachine<Character,String> fsm =
+                RegexToFiniteStateMachine.construct(regex, "label", charCmp, strCmp);
         
-        Assert.assertTrue(FSMRecognizes(fsm, ""));
+        Assert.assertTrue(FSMRecognizesWithLabel(fsm, label, ""));
         
-        Assert.assertFalse(FSMRecognizes(fsm, "a"));
+        Assert.assertFalse(FSMRecognizesWithLabel(fsm, label, "a"));
         
     }
     
@@ -39,14 +44,15 @@ public class RegexToFiniteStateMachineTest {
     public void singleCharTest() {
         
         Regex<Character> regex = Regex.singleChar('a');
-        FiniteStateMachine<Character> fsm = RegexToFiniteStateMachine.construct(regex, charCmp);
+        FiniteStateMachine<Character,String> fsm =
+                RegexToFiniteStateMachine.construct(regex, "label", charCmp, strCmp);
         
-        Assert.assertTrue(FSMRecognizes(fsm, "a"));
+        Assert.assertTrue(FSMRecognizesWithLabel(fsm, label, "a"));
         
-        Assert.assertFalse(FSMRecognizes(fsm, ""));
-        Assert.assertFalse(FSMRecognizes(fsm, "aa"));
-        Assert.assertFalse(FSMRecognizes(fsm, "ab"));
-        Assert.assertFalse(FSMRecognizes(fsm, "ba"));
+        Assert.assertFalse(FSMRecognizesWithLabel(fsm, label, ""));
+        Assert.assertFalse(FSMRecognizesWithLabel(fsm, label, "aa"));
+        Assert.assertFalse(FSMRecognizesWithLabel(fsm, label, "ab"));
+        Assert.assertFalse(FSMRecognizesWithLabel(fsm, label, "ba"));
         
     }
     
@@ -54,17 +60,18 @@ public class RegexToFiniteStateMachineTest {
     public void sequenceTest() {
         
         Regex<Character> regex = stringToSeq("hello");
-        FiniteStateMachine<Character> fsm = RegexToFiniteStateMachine.construct(regex, charCmp);
+        FiniteStateMachine<Character,String> fsm =
+                RegexToFiniteStateMachine.construct(regex, "label", charCmp, strCmp);
         
-        Assert.assertTrue(FSMRecognizes(fsm, "hello"));
+        Assert.assertTrue(FSMRecognizesWithLabel(fsm, label, "hello"));
         
-        Assert.assertFalse(FSMRecognizes(fsm, ""));
-        Assert.assertFalse(FSMRecognizes(fsm, "h"));
-        Assert.assertFalse(FSMRecognizes(fsm, "hell"));
-        Assert.assertFalse(FSMRecognizes(fsm, "hello "));
-        Assert.assertFalse(FSMRecognizes(fsm, "helloh"));
-        Assert.assertFalse(FSMRecognizes(fsm, "helloo"));
-        Assert.assertFalse(FSMRecognizes(fsm, "hellohello"));
+        Assert.assertFalse(FSMRecognizesWithLabel(fsm, label, ""));
+        Assert.assertFalse(FSMRecognizesWithLabel(fsm, label, "h"));
+        Assert.assertFalse(FSMRecognizesWithLabel(fsm, label, "hell"));
+        Assert.assertFalse(FSMRecognizesWithLabel(fsm, label, "hello "));
+        Assert.assertFalse(FSMRecognizesWithLabel(fsm, label, "helloh"));
+        Assert.assertFalse(FSMRecognizesWithLabel(fsm, label, "helloo"));
+        Assert.assertFalse(FSMRecognizesWithLabel(fsm, label, "hellohello"));
         
     }
     
@@ -75,17 +82,18 @@ public class RegexToFiniteStateMachineTest {
                 Regex.singleChar('a')
                 .alt(Regex.singleChar('b'))
                 .alt(Regex.singleChar('c'));
-        FiniteStateMachine<Character> fsm = RegexToFiniteStateMachine.construct(regex, charCmp);
+        FiniteStateMachine<Character,String> fsm =
+                RegexToFiniteStateMachine.construct(regex, "label", charCmp, strCmp);
         
-        Assert.assertTrue(FSMRecognizes(fsm, "a"));
-        Assert.assertTrue(FSMRecognizes(fsm, "b"));
-        Assert.assertTrue(FSMRecognizes(fsm, "c"));
+        Assert.assertTrue(FSMRecognizesWithLabel(fsm, label, "a"));
+        Assert.assertTrue(FSMRecognizesWithLabel(fsm, label, "b"));
+        Assert.assertTrue(FSMRecognizesWithLabel(fsm, label, "c"));
         
-        Assert.assertFalse(FSMRecognizes(fsm, ""));
-        Assert.assertFalse(FSMRecognizes(fsm, "aa"));
-        Assert.assertFalse(FSMRecognizes(fsm, "ab"));
-        Assert.assertFalse(FSMRecognizes(fsm, "ba"));
-        Assert.assertFalse(FSMRecognizes(fsm, "cc"));
+        Assert.assertFalse(FSMRecognizesWithLabel(fsm, label, ""));
+        Assert.assertFalse(FSMRecognizesWithLabel(fsm, label, "aa"));
+        Assert.assertFalse(FSMRecognizesWithLabel(fsm, label, "ab"));
+        Assert.assertFalse(FSMRecognizesWithLabel(fsm, label, "ba"));
+        Assert.assertFalse(FSMRecognizesWithLabel(fsm, label, "cc"));
         
     }
     
@@ -93,17 +101,18 @@ public class RegexToFiniteStateMachineTest {
     public void zeroOrMoreTest() {
         
         Regex<Character> regex = stringToSeq("test").zeroOrMore();
-        FiniteStateMachine<Character> fsm = RegexToFiniteStateMachine.construct(regex, charCmp);
+        FiniteStateMachine<Character,String> fsm =
+                RegexToFiniteStateMachine.construct(regex, "label", charCmp, strCmp);
         
-        Assert.assertTrue(FSMRecognizes(fsm, ""));
-        Assert.assertTrue(FSMRecognizes(fsm, "test"));
-        Assert.assertTrue(FSMRecognizes(fsm, "testtest"));
-        Assert.assertTrue(FSMRecognizes(fsm, "testtesttest"));
+        Assert.assertTrue(FSMRecognizesWithLabel(fsm, label, ""));
+        Assert.assertTrue(FSMRecognizesWithLabel(fsm, label, "test"));
+        Assert.assertTrue(FSMRecognizesWithLabel(fsm, label, "testtest"));
+        Assert.assertTrue(FSMRecognizesWithLabel(fsm, label, "testtesttest"));
         
-        Assert.assertFalse(FSMRecognizes(fsm, "a"));
-        Assert.assertFalse(FSMRecognizes(fsm, "t"));
-        Assert.assertFalse(FSMRecognizes(fsm, "tes"));
-        Assert.assertFalse(FSMRecognizes(fsm, "testt"));
+        Assert.assertFalse(FSMRecognizesWithLabel(fsm, label, "a"));
+        Assert.assertFalse(FSMRecognizesWithLabel(fsm, label, "t"));
+        Assert.assertFalse(FSMRecognizesWithLabel(fsm, label, "tes"));
+        Assert.assertFalse(FSMRecognizesWithLabel(fsm, label, "testt"));
         
     }
     
@@ -113,14 +122,15 @@ public class RegexToFiniteStateMachineTest {
         Regex<Character> regex =
                 Regex.singleChar('a').zeroOrMore()
                 .conj(stringToSeq("aa").zeroOrMore());
-        FiniteStateMachine<Character> fsm = RegexToFiniteStateMachine.construct(regex, charCmp);
+        FiniteStateMachine<Character,String> fsm =
+                RegexToFiniteStateMachine.construct(regex, "label", charCmp, strCmp);
         
-        Assert.assertTrue(FSMRecognizes(fsm, ""));
-        Assert.assertTrue(FSMRecognizes(fsm, "aa"));
-        Assert.assertTrue(FSMRecognizes(fsm, "aaaa"));
+        Assert.assertTrue(FSMRecognizesWithLabel(fsm, label, ""));
+        Assert.assertTrue(FSMRecognizesWithLabel(fsm, label, "aa"));
+        Assert.assertTrue(FSMRecognizesWithLabel(fsm, label, "aaaa"));
         
-        Assert.assertFalse(FSMRecognizes(fsm, "a"));
-        Assert.assertFalse(FSMRecognizes(fsm, "aaa"));
+        Assert.assertFalse(FSMRecognizesWithLabel(fsm, label, "a"));
+        Assert.assertFalse(FSMRecognizesWithLabel(fsm, label, "aaa"));
         
     }
     
@@ -128,16 +138,17 @@ public class RegexToFiniteStateMachineTest {
     public void negationTest() {
         
         Regex<Character> regex = stringToSeq("hello").negate();
-        FiniteStateMachine<Character> fsm = RegexToFiniteStateMachine.construct(regex, charCmp);
+        FiniteStateMachine<Character,String> fsm =
+                RegexToFiniteStateMachine.construct(regex, "label", charCmp, strCmp);
         
-        Assert.assertTrue(FSMRecognizes(fsm, ""));
-        Assert.assertTrue(FSMRecognizes(fsm, "a"));
-        Assert.assertTrue(FSMRecognizes(fsm, "h"));
-        Assert.assertTrue(FSMRecognizes(fsm, "hell"));
-        Assert.assertTrue(FSMRecognizes(fsm, "helloo"));
-        Assert.assertTrue(FSMRecognizes(fsm, "hellohello"));
+        Assert.assertTrue(FSMRecognizesWithLabel(fsm, label, ""));
+        Assert.assertTrue(FSMRecognizesWithLabel(fsm, label, "a"));
+        Assert.assertTrue(FSMRecognizesWithLabel(fsm, label, "h"));
+        Assert.assertTrue(FSMRecognizesWithLabel(fsm, label, "hell"));
+        Assert.assertTrue(FSMRecognizesWithLabel(fsm, label, "helloo"));
+        Assert.assertTrue(FSMRecognizesWithLabel(fsm, label, "hellohello"));
         
-        Assert.assertFalse(FSMRecognizes(fsm, "hello"));
+        Assert.assertFalse(FSMRecognizesWithLabel(fsm, label, "hello"));
         
     }
     
@@ -151,13 +162,15 @@ public class RegexToFiniteStateMachineTest {
         
     }
     
-    private boolean FSMRecognizes(FiniteStateMachine<Character> fsm, String inputString) {
+    private boolean FSMRecognizesWithLabel(
+            FiniteStateMachine<Character,String> fsm, String label, String inputString) {
         
         State<Character> state = fsm.initialState();
         for (Character c : inputString.toCharArray()) {
             state = fsm.nextState(state, c);
         }
-        return fsm.isAcceptingState(state);
+        return fsm.isAcceptingState(state) &&
+                fsm.acceptingStateLabels(state).contains(label);
         
     }
     

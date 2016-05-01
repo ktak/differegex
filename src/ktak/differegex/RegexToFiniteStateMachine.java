@@ -8,42 +8,69 @@ import ktak.immutablejava.Either;
 
 public class RegexToFiniteStateMachine {
     
+    private RegexToFiniteStateMachine() {}
+    
     private static final Comparator<Long> longCmp =
             (l1, l2) -> l1.compareTo(l2);
     
-    private RegexToFiniteStateMachine() {}
-    
-    public static <CharType> FiniteStateMachine<CharType> construct(
-            Regex<CharType> regex, Comparator<CharType> charCmp) {
+    public static <Ch,Lbl> FiniteStateMachine<Ch,Lbl> construct(
+            RegularVector<Ch,Lbl> regularVector,
+            Comparator<Ch> charCmp,
+            Comparator<Lbl> labelCmp) {
         
-        RegexComparator<CharType> regexCmp = new RegexComparator<CharType>(charCmp);
+        RegexComparator<Ch> regexCmp = new RegexComparator<Ch>(charCmp);
         
-        Transitions<Regex<CharType>, CharType> regexTransitions =
-                explore(regex.normalize(regexCmp),
-                        new Transitions<Regex<CharType>, CharType>(regexCmp, charCmp),
+        Transitions<RegularVector<Ch,Lbl>,Ch> regularVectorTransitions =
+                explore(regularVector.normalize(regexCmp),
+                        new Transitions<RegularVector<Ch,Lbl>,Ch>(
+                                (rv1, rv2) -> rv1.compareTo(rv2, regexCmp),
+                                charCmp),
                         regexCmp);
         
-        AATreeMap<Regex<CharType>, Long> regexToInteger =
-                regexTransitions.mapStatesToIntegers();
+        AATreeMap<RegularVector<Ch,Lbl>,Long> regularVectorToInteger =
+                regularVectorTransitions.mapStatesToIntegers();
+        
+        AATreeSet<RegularVector<Ch,Lbl>> acceptingRegularVectors =
+                findAcceptingRegularVectors(regularVectorTransitions, regexCmp);
         
         AATreeSet<Long> acceptingStates =
-                replaceRegexesWithIntegers(
-                        findAcceptingRegexes(regexTransitions, regexCmp),
-                        regexToInteger);
+                replaceRegularVectorsWithIntegers(
+                        acceptingRegularVectors,
+                        regularVectorToInteger);
         
-        Long initialState = getElseException(regexToInteger, regex.normalize(regexCmp));
+        AATreeMap<Long,AATreeSet<Lbl>> acceptingStateLabels =
+                acceptingStateLabels(
+                        acceptingRegularVectors, regularVectorToInteger, labelCmp);
         
-        return new FiniteStateMachine<CharType>(
+        Long initialState = getElseException(
+                regularVectorToInteger, regularVector.normalize(regexCmp));
+        
+        return new FiniteStateMachine<Ch,Lbl>(
                 initialState,
                 acceptingStates,
-                replaceStatesWithIntegers(regexTransitions, regexToInteger));
+                acceptingStateLabels,
+                replaceStatesWithIntegers(
+                        regularVectorTransitions, regularVectorToInteger));
         
     }
     
-    private static <CharType> Transitions<Regex<CharType>, CharType> explore(
-            Regex<CharType> state,
-            Transitions<Regex<CharType>, CharType> transitions,
-            RegexComparator<CharType> regexCmp) {
+    public static <Ch,Lbl> FiniteStateMachine<Ch,Lbl> construct(
+            Regex<Ch> regex,
+            Lbl label,
+            Comparator<Ch> charCmp,
+            Comparator<Lbl> labelCmp) {
+        
+        return construct(
+                new RegularVector<Ch,Lbl>().addRegex(regex, label),
+                charCmp,
+                labelCmp);
+        
+    }
+    
+    private static <Ch,Lbl> Transitions<RegularVector<Ch,Lbl>,Ch> explore(
+            RegularVector<Ch,Lbl> state,
+            Transitions<RegularVector<Ch,Lbl>,Ch> transitions,
+            RegexComparator<Ch> regexCmp) {
         
         return state.partition(regexCmp.charCmp).val.sortedList().foldRight(
                 transitions,
@@ -52,20 +79,20 @@ public class RegexToFiniteStateMachine {
         
     }
     
-    private static <CharType> Transitions<Regex<CharType>, CharType> updateTransitions(
-            Regex<CharType> state,
-            Either<AATreeSet<CharType>, AATreeSet<CharType>> charClass,
-            Transitions<Regex<CharType>, CharType> transitions,
-            RegexComparator<CharType> regexCmp) {
+    private static <Ch,Lbl> Transitions<RegularVector<Ch,Lbl>,Ch> updateTransitions(
+            RegularVector<Ch,Lbl> state,
+            Either<AATreeSet<Ch>, AATreeSet<Ch>> charClass,
+            Transitions<RegularVector<Ch,Lbl>,Ch> transitions,
+            RegexComparator<Ch> regexCmp) {
         
-        Regex<CharType> derivative = charClass.match(
+        RegularVector<Ch,Lbl> derivative = charClass.match(
                 (negativeSubset) -> state.nullDerivative(),
                 (positiveSubset) -> positiveSubset.sortedList().match(
                         (unit) -> state.nullDerivative(),
                         (tuple) -> state.differentiate(tuple.left, regexCmp.charCmp)))
                 .normalize(regexCmp);
         
-        Transitions<Regex<CharType>, CharType> updatedTransitions = charClass.match(
+        Transitions<RegularVector<Ch,Lbl>,Ch> updatedTransitions = charClass.match(
                 (negativeSubset) -> transitions.addDefaultTransition(
                         state, derivative),
                 (positiveSubset) -> positiveSubset.sortedList().foldRight(
@@ -81,32 +108,48 @@ public class RegexToFiniteStateMachine {
         
     }
     
-    private static <CharType> AATreeSet<Regex<CharType>> findAcceptingRegexes(
-            Transitions<Regex<CharType>, CharType> transitions,
-            RegexComparator<CharType> cmp) {
+    private static <Ch,Lbl> AATreeSet<RegularVector<Ch,Lbl>> findAcceptingRegularVectors(
+            Transitions<RegularVector<Ch,Lbl>,Ch> transitions,
+            RegexComparator<Ch> cmp) {
         
         return transitions.defaults.sortedKeys().foldRight(
-                AATreeSet.emptySet(cmp),
-                (regex) -> (acceptingStates) -> regex.matchesEmptyString() ?
-                        acceptingStates.insert(regex) : acceptingStates);
+                AATreeSet.emptySet((rv1, rv2) -> rv1.compareTo(rv2, cmp)),
+                (rv) -> (acceptingStates) -> rv.matchesEmptyString() ?
+                        acceptingStates.insert(rv) : acceptingStates);
         
     }
     
-    private static <CharType> AATreeSet<Long> replaceRegexesWithIntegers(
-            AATreeSet<Regex<CharType>> regexes,
-            AATreeMap<Regex<CharType>, Long> regexToInteger) {
+    private static <Ch,Lbl> AATreeMap<Long,AATreeSet<Lbl>> acceptingStateLabels(
+            AATreeSet<RegularVector<Ch,Lbl>> acceptingRegularVectors,
+            AATreeMap<RegularVector<Ch,Lbl>,Long> regularVectorToInteger,
+            Comparator<Lbl> labelCmp) {
         
-        return regexes.sortedList().foldRight(
+        return acceptingRegularVectors.sortedList().foldRight(
+                AATreeMap.emptyMap(longCmp),
+                (rv) -> (stateToLabels) -> stateToLabels.insert(
+                        getElseException(regularVectorToInteger, rv),
+                        rv.acceptingLabels(labelCmp).match(
+                                (unit) -> { throw new RuntimeException(); },
+                                (labels) -> labels)));
+        
+    }
+    
+    private static <Ch,Lbl> AATreeSet<Long> replaceRegularVectorsWithIntegers(
+            AATreeSet<RegularVector<Ch,Lbl>> regularVectors,
+            AATreeMap<RegularVector<Ch,Lbl>, Long> regularVectorToInteger) {
+        
+        return regularVectors.sortedList().foldRight(
                 AATreeSet.emptySet(longCmp),
-                (regex) -> (set) -> set.insert(getElseException(regexToInteger, regex)));
+                (rv) -> (set) -> set.insert(
+                        getElseException(regularVectorToInteger, rv)));
         
     }
     
-    private static <StateType, CharType> Transitions<Long, CharType> replaceStatesWithIntegers(
-            Transitions<StateType, CharType> transitions,
-            AATreeMap<StateType, Long> stateToInteger) {
+    private static <State,Ch> Transitions<Long,Ch> replaceStatesWithIntegers(
+            Transitions<State,Ch> transitions,
+            AATreeMap<State,Long> stateToInteger) {
         
-        return new Transitions<Long, CharType>(
+        return new Transitions<Long,Ch>(
                 transitions.delta.mapKV(
                         (from) -> getElseException(stateToInteger, from),
                         (outgoingArrows) -> outgoingArrows.mapValues(
