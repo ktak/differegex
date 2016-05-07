@@ -95,6 +95,10 @@ public abstract class Regex<CharType> {
         return new ZeroOrMore<CharType>(this);
     }
     
+    public Regex<CharType> oneOrMore() {
+        return this.seq(this.zeroOrMore());
+    }
+    
     public Regex<CharType> conj(Regex<CharType> second) {
         return new Conjunction<CharType>(this, second);
     }
