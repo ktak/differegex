@@ -5,6 +5,7 @@ import java.util.Comparator;
 import ktak.immutablejava.AATreeMap;
 import ktak.immutablejava.AATreeSet;
 import ktak.immutablejava.Either;
+import ktak.immutablejava.Tuple;
 
 public class RegexToFiniteStateMachine {
     
@@ -151,13 +152,15 @@ public class RegexToFiniteStateMachine {
         
         return new Transitions<Long,Ch>(
                 transitions.delta.mapKV(
-                        (from) -> getElseException(stateToInteger, from),
-                        (outgoingArrows) -> outgoingArrows.mapValues(
-                                (to) -> getElseException(stateToInteger, to)),
+                        (kv) -> Tuple.create(
+                                getElseException(stateToInteger, kv.left),
+                                kv.right.mapValues(
+                                        (to) -> getElseException(stateToInteger, to))),
                         longCmp),
                 transitions.defaults.mapKV(
-                        (from) -> getElseException(stateToInteger, from),
-                        (to) -> getElseException(stateToInteger, to),
+                        (kv) -> Tuple.create(
+                                getElseException(stateToInteger, kv.left),
+                                getElseException(stateToInteger, kv.right)),
                         longCmp),
                 transitions.charCmp);
         

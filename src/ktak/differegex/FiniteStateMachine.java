@@ -4,6 +4,7 @@ import java.util.Comparator;
 
 import ktak.immutablejava.AATreeMap;
 import ktak.immutablejava.AATreeSet;
+import ktak.immutablejava.Tuple;
 
 public class FiniteStateMachine<Ch,Lbl> {
     
@@ -54,13 +55,14 @@ public class FiniteStateMachine<Ch,Lbl> {
         
         return new Transitions<State<Ch>, Ch>(
                 transitions.delta.mapKV(
-                        (from) -> new State<Ch>(from),
-                        (outgoingArrows) -> outgoingArrows.mapValues(
-                                (to) -> new State<Ch>(to)),
+                        (kv) -> Tuple.create(
+                                new State<Ch>(kv.left),
+                                kv.right.mapValues((to) -> new State<Ch>(to))),
                         stateCmp),
                 transitions.defaults.mapKV(
-                        (from) -> new State<Ch>(from),
-                        (to) -> new State<Ch>(to),
+                        (kv) -> Tuple.create(
+                                new State<Ch>(kv.left),
+                                new State<Ch>(kv.right)),
                         stateCmp),
                 transitions.charCmp);
         
