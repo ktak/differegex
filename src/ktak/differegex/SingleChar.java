@@ -7,7 +7,7 @@ import ktak.immutablejava.Unit;
 
 class SingleChar<CharType> extends Regex<CharType> {
     
-    public final CharType matchChar;
+    protected final CharType matchChar;
     
     public SingleChar(CharType matchChar) { this.matchChar = matchChar; }
     

@@ -7,9 +7,9 @@ import ktak.immutablejava.Unit;
 
 class Conjunction<CharType> extends Regex<CharType> {
     
-    public final Regex<CharType> first;
-    public final Regex<CharType> second;
-    public final boolean matchesEmptyString;
+    protected final Regex<CharType> first;
+    protected final Regex<CharType> second;
+    private final boolean matchesEmptyString;
     
     public Conjunction(Regex<CharType> first, Regex<CharType> second) {
         this.first = first;

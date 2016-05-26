@@ -7,7 +7,7 @@ import ktak.immutablejava.Unit;
 
 class ZeroOrMore<CharType> extends Regex<CharType> {
     
-    public final Regex<CharType> regex;
+    protected final Regex<CharType> regex;
     
     public ZeroOrMore(Regex<CharType> regex) { this.regex = regex; }
     

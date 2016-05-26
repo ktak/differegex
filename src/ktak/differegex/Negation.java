@@ -7,7 +7,7 @@ import ktak.immutablejava.Unit;
 
 class Negation<CharType> extends Regex<CharType> {
     
-    public final Regex<CharType> regex;
+    protected final Regex<CharType> regex;
     
     public Negation(Regex<CharType> regex) { this.regex = regex; }
     
