@@ -6,7 +6,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import ktak.immutablejava.AATreeSet;
-import ktak.immutablejava.Either;
 import ktak.immutablejava.List;
 
 public class PartitionTest {
@@ -26,14 +25,24 @@ public class PartitionTest {
         Partition<Character> trivial = Partition.trivial(charCmp);
         Partition<Character> partition1 = Partition.singleChar(charCmp, 'a');
         
+        Partition<Character> trivialTrivial = trivial.intersect(trivial);
+        Partition<Character> trivialPartition1 = trivial.intersect(partition1);
         
-        Assert.assertEquals(0, trivial.val.sortedList().compareTo(
-                trivial.intersect(trivial).val.sortedList(),
-                trivial.val.getComparator()));
+        Assert.assertTrue(
+                (trivial.negatedSubset.sortedList().compareTo(
+                        trivialTrivial.negatedSubset.sortedList(),
+                        charCmp) == 0) &&
+                (trivial.subsets.sortedList().compareTo(
+                        trivialTrivial.subsets.sortedList(),
+                        trivial.subsets.getComparator()) == 0));
         
-        Assert.assertEquals(0, partition1.val.sortedList().compareTo(
-                trivial.intersect(partition1).val.sortedList(),
-                trivial.val.getComparator()));
+        Assert.assertTrue(
+                (partition1.negatedSubset.sortedList().compareTo(
+                        trivialPartition1.negatedSubset.sortedList(),
+                        charCmp) == 0) &&
+                (partition1.subsets.sortedList().compareTo(
+                        trivialPartition1.subsets.sortedList(),
+                        trivial.subsets.getComparator()) == 0));
         
     }
     
@@ -43,24 +52,19 @@ public class PartitionTest {
         Partition<Character> partition1 = Partition.singleChar(charCmp, 'a');
         Partition<Character> partition2 = Partition.singleChar(charCmp, 'b');
         
-        List<Either<AATreeSet<Character>, AATreeSet<Character>>> intersection =
-                new List.Nil<Either<AATreeSet<Character>, AATreeSet<Character>>>()
-                .cons(new Either.Right<AATreeSet<Character>, AATreeSet<Character>>(
-                        AATreeSet.emptySet(charCmp).insert('b')))
-                .cons(new Either.Right<AATreeSet<Character>, AATreeSet<Character>>(
-                        AATreeSet.emptySet(charCmp).insert('a')))
-                .cons(new Either.Right<AATreeSet<Character>, AATreeSet<Character>>(
-                        AATreeSet.emptySet(charCmp)))
-                .cons(new Either.Left<AATreeSet<Character>, AATreeSet<Character>>(
-                        AATreeSet.emptySet(charCmp).insert('a').insert('b')));
+        List<Character> negatedSubset = new List.Nil<Character>().cons('b').cons('a');
+        List<AATreeSet<Character>> subsets = new List.Nil<AATreeSet<Character>>()
+                .cons(AATreeSet.emptySet(charCmp).insert('b'))
+                .cons(AATreeSet.emptySet(charCmp).insert('a'))
+                .cons(AATreeSet.emptySet(charCmp));
         
-        Assert.assertEquals(0, intersection.compareTo(
-                partition1.intersect(partition2).val.sortedList(),
-                partition1.val.getComparator()));
-        
-        Assert.assertEquals(0, intersection.compareTo(
-                partition2.intersect(partition1).val.sortedList(),
-                partition1.val.getComparator()));
+        Assert.assertTrue(
+                (negatedSubset.compareTo(
+                        partition1.intersect(partition2).negatedSubset.sortedList(),
+                        charCmp) == 0) &&
+                (subsets.compareTo(
+                        partition1.intersect(partition2).subsets.sortedList(),
+                        partition1.subsets.getComparator()) == 0));
         
     }
     

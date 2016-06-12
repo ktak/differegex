@@ -4,7 +4,6 @@ import java.util.Comparator;
 
 import ktak.immutablejava.AATreeMap;
 import ktak.immutablejava.AATreeSet;
-import ktak.immutablejava.Either;
 import ktak.immutablejava.Tuple;
 
 public class RegexToFiniteStateMachine {
@@ -73,39 +72,51 @@ public class RegexToFiniteStateMachine {
             Transitions<RegularVector<Ch,Lbl>,Ch> transitions,
             RegexComparator<Ch> regexCmp) {
         
-        return state.partition(regexCmp.charCmp).val.sortedList().foldRight(
-                transitions,
+        Partition<Ch> partition = state.partition(regexCmp.charCmp);
+        
+        return partition.subsets.sortedList().foldRight(
+                updateDefaultTransitions(state, partition.negatedSubset, transitions, regexCmp),
                 (charClass) -> (newTransitions) ->
                     updateTransitions(state, charClass, newTransitions, regexCmp));
         
     }
     
-    private static <Ch,Lbl> Transitions<RegularVector<Ch,Lbl>,Ch> updateTransitions(
+    private static <Ch,Lbl> Transitions<RegularVector<Ch,Lbl>,Ch> updateDefaultTransitions(
             RegularVector<Ch,Lbl> state,
-            Either<AATreeSet<Ch>, AATreeSet<Ch>> charClass,
+            AATreeSet<Ch> negatedCharClass,
             Transitions<RegularVector<Ch,Lbl>,Ch> transitions,
             RegexComparator<Ch> regexCmp) {
         
-        RegularVector<Ch,Lbl> derivative = charClass.match(
-                (negativeSubset) -> state.nullDerivative(),
-                (positiveSubset) -> positiveSubset.sortedList().match(
+        RegularVector<Ch,Lbl> derivative = state.nullDerivative().normalize(regexCmp);
+        
+        Transitions<RegularVector<Ch,Lbl>,Ch> updatedTransitions =
+                transitions.addDefaultTransition(state, derivative);
+        
+        return transitions.defaults.containsKey(derivative) ?
+                updatedTransitions : explore(derivative, updatedTransitions, regexCmp);
+        
+    }
+    
+    private static <Ch,Lbl> Transitions<RegularVector<Ch,Lbl>,Ch> updateTransitions(
+            RegularVector<Ch,Lbl> state,
+            AATreeSet<Ch> charClass,
+            Transitions<RegularVector<Ch,Lbl>,Ch> transitions,
+            RegexComparator<Ch> regexCmp) {
+        
+        RegularVector<Ch,Lbl> derivative =
+                charClass.sortedList().match(
                         (unit) -> state.nullDerivative(),
-                        (tuple) -> state.differentiate(tuple.left, regexCmp.charCmp)))
+                        (tuple) -> state.differentiate(tuple.left, regexCmp.charCmp))
                 .normalize(regexCmp);
         
-        Transitions<RegularVector<Ch,Lbl>,Ch> updatedTransitions = charClass.match(
-                (negativeSubset) -> transitions.addDefaultTransition(
-                        state, derivative),
-                (positiveSubset) -> positiveSubset.sortedList().foldRight(
+        Transitions<RegularVector<Ch,Lbl>,Ch> updatedTransitions =
+                charClass.sortedList().foldRight(
                         transitions,
                         (charVal) -> (transitionsTmp) ->
-                            transitionsTmp.addTransition(
-                                    state, charVal, derivative)));
+                        transitionsTmp.addTransition(state, charVal, derivative));
         
-        return transitions.delta.containsKey(derivative) ||
-                transitions.defaults.containsKey(derivative) ?
-                updatedTransitions :
-                explore(derivative, updatedTransitions, regexCmp);
+        return transitions.delta.containsKey(derivative) ?
+                updatedTransitions : explore(derivative, updatedTransitions, regexCmp);
         
     }
     
