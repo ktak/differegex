@@ -55,7 +55,7 @@ class Conjunction<CharType> extends Regex<CharType> {
     
     @Override
     protected Regex<CharType> nullDerivative() {
-        return first.nullDerivative().alt(second.nullDerivative());
+        return first.nullDerivative().conj(second.nullDerivative());
     }
     
     private Regex<CharType> orderedConj(
@@ -88,6 +88,20 @@ class Conjunction<CharType> extends Regex<CharType> {
         
     }
     
+    private Regex<CharType> checkIdempotence(
+            Regex<CharType> normalized, RegexComparator<CharType> cmp) {
+        
+        return normalized.matchConjunction(
+                // r & r & x = r & x
+                (conj1) -> conj1.second.matchConjunction(
+                        (conj2) -> cmp.compare(conj1.first, conj2.first) == 0 ?
+                                conj2 :
+                                conj1,
+                        (unit) -> normalized),
+                (unit) -> normalized);
+        
+    }
+    
     @Override
     protected Regex<CharType> normalize(RegexComparator<CharType> cmp) {
         
@@ -108,9 +122,11 @@ class Conjunction<CharType> extends Regex<CharType> {
                 (zeroOrMore) -> checkSecond(firstNormalized, secondNormalized, cmp),
                 // make conjunction chains right associative to normalize associativity
                 (conjunction) ->
-                        conjunction.first.conj(
-                                conjunction.second.conj(secondNormalized).normalize(cmp))
-                        .normalize(cmp),
+                        checkIdempotence(
+                                conjunction.first.conj(
+                                        conjunction.second.conj(secondNormalized).normalize(cmp))
+                                .normalize(cmp),
+                                cmp),
                 (negation) -> negation.regex.matchEmptySet(
                         // NOT(NULL) & r = r
                         (emptySet) -> secondNormalized,

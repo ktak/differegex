@@ -88,6 +88,20 @@ class Alternation<CharType> extends Regex<CharType> {
         
     }
     
+    private Regex<CharType> checkIdempotence(
+            Regex<CharType> normalized, RegexComparator<CharType> cmp) {
+        
+        return normalized.matchAlternation(
+                // r | r | x = r | x
+                (alt1) -> alt1.second.matchAlternation(
+                        (alt2) -> cmp.compare(alt1.first, alt2.first) == 0 ?
+                                alt2 :
+                                alt1,
+                        (unit) -> normalized),
+                (unit) -> normalized);
+        
+    }
+    
     @Override
     protected Regex<CharType> normalize(RegexComparator<CharType> cmp) {
         
@@ -106,9 +120,11 @@ class Alternation<CharType> extends Regex<CharType> {
                 (sequence) -> checkSecond(firstNormalized, secondNormalized, cmp),
                 // make alternation chains right associative to normalize associativity
                 (alternation) ->
-                        alternation.first.alt(
-                                alternation.second.alt(secondNormalized).normalize(cmp))
-                        .normalize(cmp),
+                        checkIdempotence(
+                                alternation.first.alt(
+                                        alternation.second.alt(secondNormalized).normalize(cmp))
+                                .normalize(cmp),
+                                cmp),
                 (zeroOrMore) -> checkSecond(firstNormalized, secondNormalized, cmp),
                 (conjunction) -> checkSecond(firstNormalized, secondNormalized, cmp),
                 (negation) -> negation.regex.matchEmptySet(
