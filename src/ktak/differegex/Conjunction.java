@@ -3,7 +3,6 @@ package ktak.differegex;
 import java.util.Comparator;
 
 import ktak.immutablejava.Function;
-import ktak.immutablejava.Unit;
 
 class Conjunction<CharType> extends Regex<CharType> {
     
@@ -43,7 +42,7 @@ class Conjunction<CharType> extends Regex<CharType> {
     @Override
     protected <R> R matchConjunction(
             Function<Conjunction<CharType>,R> conjunctionCase,
-            Function<Unit,R> otherwise) {
+            Function<Regex<CharType>,R> otherwise) {
         return conjunctionCase.apply(this);
     }
     
@@ -58,47 +57,80 @@ class Conjunction<CharType> extends Regex<CharType> {
         return first.nullDerivative().conj(second.nullDerivative());
     }
     
-    private Regex<CharType> orderedConj(
-            Regex<CharType> first, Regex<CharType> second, RegexComparator<CharType> cmp) {
-        // order (non conjunction) subcomponents to normalize symmetry
-        return cmp.compare(first, second) < 0 ? first.conj(second) : second.conj(first);
+    private static <CharType> Regex<CharType> normalizeZeroElement(
+            Regex<CharType> first, Regex<CharType> second) {
         
-    }
-    
-    private Regex<CharType> checkSecond(
-            Regex<CharType> first, Regex<CharType> second, RegexComparator<CharType> cmp) {
-        
-        return second.match(
-                // r & NULL = NULL
+        return first.matchEmptySet(
+                // NULL & r = NULL
                 (emptySet) -> emptySet,
-                (emptyString) -> orderedConj(first, second, cmp),
-                (singleChar) -> orderedConj(first, second, cmp),
-                (sequence) -> orderedConj(first, second, cmp),
-                (alternation) -> orderedConj(first, second, cmp),
-                (zeroOrMore) -> orderedConj(first, second, cmp),
-                // order (non conjunction) subcomponents to normalize symmetry
-                (conjunction) -> cmp.compare(first, conjunction.first) < 0 ?
-                        first.conj(second) :
-                        conjunction.first.conj(
-                                first.conj(conjunction.second).normalize(cmp)),
-                (negation) -> negation.regex.matchEmptySet(
-                        // r & NOT(NULL) = r
-                        (emptySet) -> first,
-                        (unit) -> orderedConj(first, second, cmp)));
+                (unit1) -> second.matchEmptySet(
+                        // r & NULL = NULL
+                        (emptySet) -> emptySet,
+                        (unit2) -> first.conj(second)));
         
     }
     
-    private Regex<CharType> checkIdempotence(
-            Regex<CharType> normalized, RegexComparator<CharType> cmp) {
+    private static <CharType> Regex<CharType> normalizeUnitElement(
+            Regex<CharType> first, Regex<CharType> second) {
         
-        return normalized.matchConjunction(
-                // r & r & x = r & x
-                (conj1) -> conj1.second.matchConjunction(
-                        (conj2) -> cmp.compare(conj1.first, conj2.first) == 0 ?
-                                conj2 :
-                                conj1,
-                        (unit) -> normalized),
-                (unit) -> normalized);
+        return first.matchNegation(
+                (neg1) -> neg1.regex.matchEmptySet(
+                        // NOT(NULL) & r = r
+                        (emptySet) -> second,
+                        (unit1) -> second.matchNegation(
+                                (neg2) -> neg2.regex.matchEmptySet(
+                                        // r & NOT(NULL) = r
+                                        (emptySet) -> first,
+                                        (unit2) -> first.conj(second)),
+                                (unit2) -> first.conj(second))),
+                (unit1) -> second.matchNegation(
+                        (neg) -> neg.regex.matchEmptySet(
+                                // r & NOT(NULL) = r
+                                (emptySet) -> first,
+                                (unit2) -> first.conj(second)),
+                        (unit2) -> first.conj(second)));
+        
+    }
+    
+    private static <CharType> Regex<CharType> normalizeAssociativity(
+            Regex<CharType> first, Regex<CharType> second, RegexComparator<CharType> cmp) {
+        
+        return first.matchConjunction(
+                (conj1) ->
+                    // make conjunction right associative
+                    conj1.first.conj(
+                            conj1.second.conj(second).normalize(cmp))
+                    .normalize(cmp),
+                (unit) -> first.conj(second));
+        
+    }
+    
+    private static <CharType> Regex<CharType> normalizeSymmetry(
+            Regex<CharType> first, Regex<CharType> second, RegexComparator<CharType> cmp) {
+        
+        return second.matchConjunction(
+                (conj2) -> cmp.compare(first, conj2.first) < 0 ?
+                        first.conj(second) :
+                        conj2.first.conj(
+                                first.conj(conj2.second).normalize(cmp)),
+                (unit) -> cmp.compare(first, second) < 0 ?
+                        first.conj(second) :
+                        second.conj(first));
+        
+    }
+    
+    private Regex<CharType> normalizeIdempotence(
+            Regex<CharType> first, Regex<CharType> second, RegexComparator<CharType> cmp) {
+        
+        return cmp.compare(first, second) == 0 ?
+                // r & r = r
+                first :
+                second.matchConjunction(
+                        (conj2) -> cmp.compare(first, conj2.first) == 0 ?
+                                // r & (r & x) = r & x
+                                second :
+                                first.conj(second),
+                        (unit) -> first.conj(second));
         
     }
     
@@ -108,29 +140,15 @@ class Conjunction<CharType> extends Regex<CharType> {
         Regex<CharType> firstNormalized = first.normalize(cmp);
         Regex<CharType> secondNormalized = second.normalize(cmp);
         
-        // r & r = r
-        if (cmp.compare(firstNormalized, secondNormalized) == 0)
-            return firstNormalized;
-        
-        return firstNormalized.match(
-                // NULL & r = NULL
-                (emptySet) -> emptySet,
-                (emptyString) -> checkSecond(firstNormalized, secondNormalized, cmp),
-                (singleChar) -> checkSecond(firstNormalized, secondNormalized, cmp),
-                (sequence) -> checkSecond(firstNormalized, secondNormalized, cmp),
-                (alternation) -> checkSecond(firstNormalized, secondNormalized, cmp),
-                (zeroOrMore) -> checkSecond(firstNormalized, secondNormalized, cmp),
-                // make conjunction chains right associative to normalize associativity
-                (conjunction) ->
-                        checkIdempotence(
-                                conjunction.first.conj(
-                                        conjunction.second.conj(secondNormalized).normalize(cmp))
-                                .normalize(cmp),
-                                cmp),
-                (negation) -> negation.regex.matchEmptySet(
-                        // NOT(NULL) & r = r
-                        (emptySet) -> secondNormalized,
-                        (unit) -> checkSecond(firstNormalized, secondNormalized, cmp)));
+        return normalizeZeroElement(firstNormalized, secondNormalized).matchConjunction(
+                (conj1) -> normalizeUnitElement(conj1.first, conj1.second).matchConjunction(
+                        (conj2) -> normalizeAssociativity(conj2.first, conj2.second, cmp).matchConjunction(
+                                (conj3) -> normalizeSymmetry(conj3.first, conj3.second, cmp).matchConjunction(
+                                        (conj4) -> normalizeIdempotence(conj4.first, conj4.second, cmp),
+                                        (regex) -> regex),
+                                (regex) -> regex),
+                        (regex) -> regex),
+                (regex) -> regex);
         
     }
     

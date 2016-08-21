@@ -31,6 +31,17 @@ public class AlternationNormalizationTest {
                 testRegex.alt(testRegex).normalize(regexCmp),
                 testRegex.normalize(regexCmp)));
         
+        Assert.assertEquals(0, regexCmp.compare(
+                Regex.singleChar('b')
+                .alt(Regex.singleChar('a'))
+                .alt(Regex.singleChar('b').alt(
+                        Regex.singleChar('c'))
+                        .alt(Regex.singleChar('a')))
+                .normalize(regexCmp),
+                Regex.singleChar('a').alt(
+                        Regex.singleChar('b').alt(
+                                Regex.singleChar('c')))));
+        
     }
     
     @Test

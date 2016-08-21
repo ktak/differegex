@@ -30,6 +30,20 @@ public class ConjunctionNormalizationTest {
                 testRegex.conj(testRegex).normalize(regexCmp),
                 testRegex.normalize(regexCmp)));
         
+        Assert.assertEquals(0, regexCmp.compare(
+                Regex.singleChar('z').conj(
+                        Regex.singleChar('x')
+                        .conj(Regex.singleChar('z')))
+                .conj(Regex.singleChar('w').conj(
+                        Regex.singleChar('y').conj(
+                                Regex.singleChar('x'))
+                        .conj(Regex.singleChar('y'))))
+                .normalize(regexCmp),
+                Regex.singleChar('w').conj(
+                        Regex.singleChar('x').conj(
+                                Regex.singleChar('y').conj(
+                                        Regex.singleChar('z'))))));
+        
     }
     
     @Test
