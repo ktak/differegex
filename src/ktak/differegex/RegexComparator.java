@@ -10,7 +10,7 @@ class RegexComparator<CharType> implements Comparator<Regex<CharType>> {
     
     // defines an arbitrary ordering among the abstract syntax forms
     //  of a regex: EmptySet < EmptyString < SingleChar < Sequence <
-    //  Alternation < ZeroOrMore < Conjunction < Negation
+    //  Alternation < ZeroOrMore < Conjunction < Negation < AnyChar
     @Override
     public int compare(Regex<CharType> o1, Regex<CharType> o2) {
         
@@ -23,7 +23,8 @@ class RegexComparator<CharType> implements Comparator<Regex<CharType>> {
                         alternation2 -> -1,
                         zeroOrMore2 -> -1,
                         conjunction2 -> -1,
-                        negation2 -> -1),
+                        negation2 -> -1,
+                        anyChar2 -> -1),
                 emptyString1 -> o2.match(
                         emptySet2 -> 1,
                         emptyString2 -> 0,
@@ -32,7 +33,8 @@ class RegexComparator<CharType> implements Comparator<Regex<CharType>> {
                         alternation2 -> -1,
                         zeroOrMore2 -> -1,
                         conjunction2 -> -1,
-                        negation2 -> -1),
+                        negation2 -> -1,
+                        anyChar2 -> -1),
                 singleChar1 -> o2.match(
                         emptySet2 -> 1,
                         emptyString2 -> 1,
@@ -42,7 +44,8 @@ class RegexComparator<CharType> implements Comparator<Regex<CharType>> {
                         alternation2 -> -1,
                         zeroOrMore2 -> -1,
                         conjunction2 -> -1,
-                        negation2 -> -1),
+                        negation2 -> -1,
+                        anyChar2 -> -1),
                 sequence1 -> o2.match(
                         emptySet2 -> 1,
                         emptyString2 -> 1,
@@ -57,7 +60,8 @@ class RegexComparator<CharType> implements Comparator<Regex<CharType>> {
                         alternation2 -> -1,
                         zeroOrMore2 -> -1,
                         conjunction2 -> -1,
-                        negation2 -> -1),
+                        negation2 -> -1,
+                        anyChar2 -> -1),
                 alternation1 -> o2.match(
                         emptySet2 -> 1,
                         emptyString2 -> 1,
@@ -72,7 +76,8 @@ class RegexComparator<CharType> implements Comparator<Regex<CharType>> {
                         },
                         zeroOrMore2 -> -1,
                         conjunction2 -> -1,
-                        negation2 -> -1),
+                        negation2 -> -1,
+                        anyChar2 -> -1),
                 zeroOrMore1 -> o2.match(
                         emptySet2 -> 1,
                         emptyString2 -> 1,
@@ -82,7 +87,8 @@ class RegexComparator<CharType> implements Comparator<Regex<CharType>> {
                         zeroOrMore2 -> this.compare(
                                 zeroOrMore1.regex, zeroOrMore2.regex),
                         conjunction2 -> -1,
-                        negation2 -> -1),
+                        negation2 -> -1,
+                        anyChar2 -> -1),
                 conjunction1 -> o2.match(
                         emptySet2 -> 1,
                         emptyString2 -> 1,
@@ -97,7 +103,8 @@ class RegexComparator<CharType> implements Comparator<Regex<CharType>> {
                                     firstCmp :
                                     this.compare(conjunction1.second, conjunction2.second);
                         },
-                        negation2 -> -1),
+                        negation2 -> -1,
+                        anyChar2 -> -1),
                 negation1 -> o2.match(
                         emptySet2 -> 1,
                         emptyString2 -> 1,
@@ -107,7 +114,18 @@ class RegexComparator<CharType> implements Comparator<Regex<CharType>> {
                         zeroOrMore2 -> 1,
                         conjunction2 -> 1,
                         negation2 -> this.compare(
-                                negation1.regex, negation2.regex)));
+                                negation1.regex, negation2.regex),
+                        anyChar2 -> -1),
+                anyChar1 -> o2.match(
+                        emptySet2 -> 1,
+                        emptyString2 -> 1,
+                        singleChar2 -> 1,
+                        sequence2 -> 1,
+                        alternation2 -> 1,
+                        zeroOrMore2 -> 1,
+                        conjunction2 -> 1,
+                        negation2 -> 1,
+                        anyChar2 -> 0));
         
     }
     

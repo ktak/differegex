@@ -14,7 +14,8 @@ public abstract class Regex<CharType> {
             Function<Alternation<CharType>,R> alternationCase,
             Function<ZeroOrMore<CharType>,R> zeroOrMoreCase,
             Function<Conjunction<CharType>,R> conjunctionCase,
-            Function<Negation<CharType>,R> negationCase);
+            Function<Negation<CharType>,R> negationCase,
+            Function<AnyChar<CharType>,R> anyCharCase);
     
     protected <R> R matchEmptySet(
             Function<EmptySet<CharType>,R> emptySetCase,
@@ -84,6 +85,14 @@ public abstract class Regex<CharType> {
     
     public static <CharType> Regex<CharType> singleChar(CharType matchChar) {
         return new SingleChar<CharType>(matchChar);
+    }
+    
+    public static <CharType> Regex<CharType> anyChar(Class<CharType> x) {
+        return new AnyChar<CharType>();
+    }
+    
+    public static <CharType> Regex<CharType> anyChar() {
+        return new AnyChar<CharType>();
     }
     
     public Regex<CharType> seq(Regex<CharType> second) {

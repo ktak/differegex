@@ -29,7 +29,8 @@ class ZeroOrMore<CharType> extends Regex<CharType> {
             Function<Alternation<CharType>, R> alternationCase,
             Function<ZeroOrMore<CharType>, R> zeroOrMoreCase,
             Function<Conjunction<CharType>, R> conjunctionCase,
-            Function<Negation<CharType>, R> negationCase) {
+            Function<Negation<CharType>, R> negationCase,
+            Function<AnyChar<CharType>,R> anyCharCase) {
         return zeroOrMoreCase.apply(this);
     }
     
@@ -66,7 +67,8 @@ class ZeroOrMore<CharType> extends Regex<CharType> {
                 // r** = r*
                 (zeroOrMore) -> zeroOrMore,
                 (conjunction) -> normalized.zeroOrMore(),
-                (negation) -> normalized.zeroOrMore());
+                (negation) -> normalized.zeroOrMore(),
+                (anyChar) -> normalized.zeroOrMore());
         
     }
     

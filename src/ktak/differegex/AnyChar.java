@@ -4,20 +4,16 @@ import java.util.Comparator;
 
 import ktak.immutablejava.Function;
 
-class Negation<CharType> extends Regex<CharType> {
-    
-    protected final Regex<CharType> regex;
-    
-    public Negation(Regex<CharType> regex) { this.regex = regex; }
+class AnyChar<CharType> extends Regex<CharType> {
     
     @Override
     protected boolean matchesEmptyString() {
-        return !regex.matchesEmptyString();
+        return false;
     }
     
     @Override
     protected Partition<CharType> partition(Comparator<CharType> cmp) {
-        return regex.partition(cmp);
+        return Partition.trivial(cmp);
     }
     
     @Override
@@ -31,36 +27,22 @@ class Negation<CharType> extends Regex<CharType> {
             Function<Conjunction<CharType>, R> conjunctionCase,
             Function<Negation<CharType>, R> negationCase,
             Function<AnyChar<CharType>,R> anyCharCase) {
-        return negationCase.apply(this);
-    }
-    
-    @Override
-    protected <R> R matchNegation(
-            Function<Negation<CharType>,R> negationCase,
-            Function<Regex<CharType>,R> otherwise) {
-        return negationCase.apply(this);
+        return anyCharCase.apply(this);
     }
     
     @Override
     protected Regex<CharType> differentiate(CharType matchChar, Comparator<CharType> cmp) {
-        return regex.differentiate(matchChar, cmp).negate();
+        return Regex.emptyString();
     }
     
     @Override
     protected Regex<CharType> nullDerivative() {
-        return regex.nullDerivative().negate();
+        return Regex.emptyString();
     }
     
     @Override
     protected Regex<CharType> normalize(RegexComparator<CharType> cmp) {
-        
-        Regex<CharType> normalized = regex.normalize(cmp);
-        
-        return normalized.matchNegation(
-                // NOT(NOT(r)) = r
-                (negation) -> negation.regex,
-                (unit) -> normalized.negate());
-        
+        return this;
     }
     
 }

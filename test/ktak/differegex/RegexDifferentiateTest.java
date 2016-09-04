@@ -165,4 +165,21 @@ public class RegexDifferentiateTest {
         
     }
     
+    @Test
+    public void anyCharTest() {
+        
+        Assert.assertEquals(0, regexCmp.compare(
+                Regex.anyChar(Character.class).differentiate('a', charCmp),
+                Regex.emptyString()));
+        
+        Assert.assertEquals(0, regexCmp.compare(
+                Regex.anyChar(Character.class).differentiate('!', charCmp),
+                Regex.emptyString()));
+        
+        Assert.assertEquals(0, regexCmp.compare(
+                Regex.anyChar(Character.class).differentiate('.', charCmp),
+                Regex.emptyString()));
+        
+    }
+    
 }

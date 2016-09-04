@@ -152,6 +152,24 @@ public class RegexToFiniteStateMachineTest {
         
     }
     
+    @Test
+    public void anyCharTest() {
+        
+        Regex<Character> regex = Regex.anyChar();
+        FiniteStateMachine<Character,String> fsm =
+                RegexToFiniteStateMachine.construct(regex, "label", charCmp, strCmp);
+        
+        Assert.assertTrue(FSMRecognizesWithLabel(fsm, label, "a"));
+        Assert.assertTrue(FSMRecognizesWithLabel(fsm, label, "z"));
+        Assert.assertTrue(FSMRecognizesWithLabel(fsm, label, "$"));
+        Assert.assertTrue(FSMRecognizesWithLabel(fsm, label, "_"));
+        
+        Assert.assertFalse(FSMRecognizesWithLabel(fsm, label, ""));
+        Assert.assertFalse(FSMRecognizesWithLabel(fsm, label, "aa"));
+        Assert.assertFalse(FSMRecognizesWithLabel(fsm, label, "+="));
+        
+    }
+    
     private Regex<Character> stringToSeq(String s) {
         
         Regex<Character> regex = Regex.emptyString();

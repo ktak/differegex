@@ -35,7 +35,8 @@ class Conjunction<CharType> extends Regex<CharType> {
             Function<Alternation<CharType>, R> alternationCase,
             Function<ZeroOrMore<CharType>, R> zeroOrMoreCase,
             Function<Conjunction<CharType>, R> conjunctionCase,
-            Function<Negation<CharType>, R> negationCase) {
+            Function<Negation<CharType>, R> negationCase,
+            Function<AnyChar<CharType>,R> anyCharCase) {
         return conjunctionCase.apply(this);
     }
     
